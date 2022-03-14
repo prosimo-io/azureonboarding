@@ -1,0 +1,584 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.1318.3566",
+      "templateHash": "8328318527593609411"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[deployment().location]"
+    },
+    "prosimoTeamName": {
+      "type": "string"
+    },
+    "prosimoApiToken": {
+      "type": "string"
+    },
+    "keyVaultId": {
+      "type": "string"
+    },
+    "clientId": {
+      "type": "string",
+      "defaultValue": "prosimoSPClientId"
+    },
+    "clientSecret": {
+      "type": "string",
+      "defaultValue": "prosimoSPpassword"
+    },
+    "managementGroupName": {
+      "type": "string"
+    },
+    "subscriptionId": {
+      "type": "string"
+    },
+    "time": {
+      "type": "string",
+      "defaultValue": "[utcNow()]"
+    }
+  },
+  "variables": {
+    "scriptRole": "[json('{\n    \"roleName\": \"prosimo-script-minimum-privilege-for-deployment-principal\",\n    \"description\": \"Configure least privilege for the deployment principal in deployment script\",\n    \"type\": \"customRole\",\n    \"IsCustom\": true,\n    \"permissions\": [\n      {\n        \"actions\": [\n          \"Microsoft.Storage/storageAccounts/*\",\n          \"Microsoft.ContainerInstance/containerGroups/*\",\n          \"Microsoft.Resources/deployments/*\",\n          \"Microsoft.Resources/deploymentScripts/*\"\n        ]\n      }\n    ],\n    \"assignableScopes\": [\n      \"[subscription().id]\"\n    ]\n  }')]",
+    "reader": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+    "resourceGroupName": "[format('rg-prosimo-{0}', take(guid(variables('subscriptionGuid')), 8))]",
+    "keyVaultName": "[split(parameters('keyVaultId'), '/')[8]]",
+    "subscriptionGuid": "[replace(parameters('subscriptionId'), '/subscriptions/', '')]",
+    "prosimoApiSecret": "prosimoApiPassword",
+    "tags": {
+      "Prosimo Team Name": "[parameters('prosimoTeamName')]",
+      "Purpose": "Used to store Service Principal ID and secret for Prosimo orchestration"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('addApi-{0}', parameters('time'))]",
+      "subscriptionId": "[variables('subscriptionGuid')]",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "keyVaultName": {
+            "value": "[variables('keyVaultName')]"
+          },
+          "secretName": {
+            "value": "[variables('prosimoApiSecret')]"
+          },
+          "secretValue": {
+            "value": "[parameters('prosimoApiToken')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "11625835412610679373"
+            }
+          },
+          "parameters": {
+            "secretName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the secret to store in Key Vault"
+              }
+            },
+            "secretValue": {
+              "type": "secureString",
+              "metadata": {
+                "description": "Value of the secret to store in Key Vault"
+              }
+            },
+            "keyVaultName": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2021-06-01-preview",
+              "name": "[format('{0}/{1}', parameters('keyVaultName'), parameters('secretName'))]",
+              "properties": {
+                "value": "[parameters('secretValue')]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('scriptRole-{0}', parameters('time'))]",
+      "subscriptionId": "[variables('subscriptionGuid')]",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "assignmentScope": {
+            "value": "[parameters('subscriptionId')]"
+          },
+          "roleDescription": {
+            "value": "[variables('scriptRole').description]"
+          },
+          "roleName": {
+            "value": "[variables('scriptRole').roleName]"
+          },
+          "rolePermissions": {
+            "value": "[variables('scriptRole').permissions]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "10448395622682263845"
+            }
+          },
+          "parameters": {
+            "assignmentScope": {
+              "type": "string"
+            },
+            "rolePermissions": {
+              "type": "array"
+            },
+            "roleDescription": {
+              "type": "string"
+            },
+            "roleName": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleDefinitions",
+              "apiVersion": "2018-01-01-preview",
+              "name": "[guid(parameters('roleName'), parameters('assignmentScope'))]",
+              "properties": {
+                "permissions": "[parameters('rolePermissions')]",
+                "assignableScopes": [
+                  "[parameters('assignmentScope')]"
+                ],
+                "description": "[parameters('roleDescription')]",
+                "roleName": "[parameters('roleName')]"
+              }
+            }
+          ],
+          "outputs": {
+            "roleId": {
+              "type": "string",
+              "value": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', guid(parameters('roleName'), parameters('assignmentScope')))]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('managedIdentity-{0}', parameters('time'))]",
+      "subscriptionId": "[variables('subscriptionGuid')]",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "identityName": {
+            "value": "prosimo-sub-onboard"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "9602419024883774685"
+            }
+          },
+          "parameters": {
+            "identityName": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]"
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2018-11-30",
+              "name": "[parameters('identityName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]"
+            }
+          ],
+          "outputs": {
+            "identityResourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('identityName'))]"
+            },
+            "identityPrincipalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('identityName'))).principalId]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('assignMgtReader-{0}', parameters('time'))]",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "principalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityPrincipalId.value]"
+          },
+          "principalType": {
+            "value": "ServicePrincipal"
+          },
+          "roleId": {
+            "value": "[variables('reader')]"
+          },
+          "assignmentGuid": {
+            "value": "[guid(managementGroup().id, variables('reader'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityResourceId.value)]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "16555602669376192237"
+            }
+          },
+          "parameters": {
+            "principalId": {
+              "type": "string"
+            },
+            "roleId": {
+              "type": "string"
+            },
+            "principalType": {
+              "type": "string"
+            },
+            "assignmentGuid": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-08-01-preview",
+              "name": "[parameters('assignmentGuid')]",
+              "properties": {
+                "principalId": "[parameters('principalId')]",
+                "roleDefinitionId": "[parameters('roleId')]",
+                "principalType": "[parameters('principalType')]"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('assignRgReader-{0}', parameters('time'))]",
+      "subscriptionId": "[variables('subscriptionGuid')]",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "principalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityPrincipalId.value]"
+          },
+          "principalType": {
+            "value": "ServicePrincipal"
+          },
+          "roleId": {
+            "value": "[variables('reader')]"
+          },
+          "assignmentGuid": {
+            "value": "[guid(subscriptionResourceId(variables('subscriptionGuid'), 'Microsoft.Resources/resourceGroups', variables('resourceGroupName')), variables('reader'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityResourceId.value)]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "4991553664898485462"
+            }
+          },
+          "parameters": {
+            "principalId": {
+              "type": "string"
+            },
+            "roleId": {
+              "type": "string"
+            },
+            "principalType": {
+              "type": "string"
+            },
+            "assignmentGuid": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-08-01-preview",
+              "name": "[parameters('assignmentGuid')]",
+              "properties": {
+                "principalId": "[parameters('principalId')]",
+                "roleDefinitionId": "[parameters('roleId')]",
+                "principalType": "[parameters('principalType')]"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('assignScriptRole-{0}', parameters('time'))]",
+      "subscriptionId": "[variables('subscriptionGuid')]",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "principalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityPrincipalId.value]"
+          },
+          "principalType": {
+            "value": "ServicePrincipal"
+          },
+          "roleId": {
+            "value": "[reference(subscriptionResourceId(variables('subscriptionGuid'), 'Microsoft.Resources/deployments', format('scriptRole-{0}', parameters('time')))).outputs.roleId.value]"
+          },
+          "assignmentGuid": {
+            "value": "[guid(parameters('subscriptionId'), variables('reader'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityResourceId.value)]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "2323977695226090064"
+            }
+          },
+          "parameters": {
+            "principalId": {
+              "type": "string"
+            },
+            "roleId": {
+              "type": "string"
+            },
+            "principalType": {
+              "type": "string"
+            },
+            "assignmentGuid": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-08-01-preview",
+              "name": "[parameters('assignmentGuid')]",
+              "properties": {
+                "principalId": "[parameters('principalId')]",
+                "roleDefinitionId": "[parameters('roleId')]",
+                "principalType": "[parameters('principalType')]"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))]",
+        "[subscriptionResourceId(variables('subscriptionGuid'), 'Microsoft.Resources/deployments', format('scriptRole-{0}', parameters('time')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('onboardSubs-{0}', parameters('time'))]",
+      "subscriptionId": "[variables('subscriptionGuid')]",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "clientId": {
+            "value": "[parameters('clientId')]"
+          },
+          "clientSecret": {
+            "value": "[parameters('clientSecret')]"
+          },
+          "identityId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityResourceId.value]"
+          },
+          "name": {
+            "value": "prosimo-onboard-subscriptions"
+          },
+          "prosimoApiToken": {
+            "value": "[variables('prosimoApiSecret')]"
+          },
+          "prosimoTeamName": {
+            "value": "[parameters('prosimoTeamName')]"
+          },
+          "managementGroupName": {
+            "value": "[parameters('managementGroupName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "keyVaultName": {
+            "value": "[variables('keyVaultName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "9008860328469406277"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]"
+            },
+            "identityId": {
+              "type": "string"
+            },
+            "prosimoTeamName": {
+              "type": "string"
+            },
+            "prosimoApiToken": {
+              "type": "string"
+            },
+            "clientId": {
+              "type": "string"
+            },
+            "clientSecret": {
+              "type": "string"
+            },
+            "keyVaultName": {
+              "type": "string"
+            },
+            "managementGroupName": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "tenantId": "[tenant().tenantId]",
+            "scriptUrl": "https://raw.githubusercontent.com/prosimo-io/azure/main/PowerShell/onboard-cloud-account.ps1"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deploymentScripts",
+              "apiVersion": "2020-10-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "kind": "AzurePowerShell",
+              "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', parameters('identityId'))]": {}
+                }
+              },
+              "properties": {
+                "azPowerShellVersion": "7.3",
+                "cleanupPreference": "OnExpiration",
+                "retentionInterval": "P1D",
+                "timeout": "PT1H",
+                "arguments": "[format('-prosimoTeamName ''{0}'' -prosimoApiToken ''{1}'' -clientId ''{2}'' -managementGroupName ''{3}'' -tenantId ''{4}'' -clientSecret ''{5}'' -keyVaultName ''{6}'' ', parameters('prosimoTeamName'), parameters('prosimoApiToken'), parameters('clientId'), parameters('managementGroupName'), variables('tenantId'), parameters('clientSecret'), parameters('keyVaultName'))]",
+                "primaryScriptUri": "[variables('scriptUrl')]"
+              }
+            }
+          ],
+          "outputs": {
+            "scriptId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Resources/deploymentScripts', parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('addApi-{0}', parameters('time')))]",
+        "[extensionResourceId(managementGroup().id, 'Microsoft.Resources/deployments', format('assignMgtReader-{0}', parameters('time')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('assignRgReader-{0}', parameters('time')))]",
+        "[subscriptionResourceId(variables('subscriptionGuid'), 'Microsoft.Resources/deployments', format('assignScriptRole-{0}', parameters('time')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))]"
+      ]
+    }
+  ]
+}

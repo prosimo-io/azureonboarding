@@ -1,0 +1,121 @@
+{
+    "$schema": "<relative path to createFormUI.schema.json>",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "Prosimo Service Principal Creation",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "Basics",
+                    "elements": [
+                        {
+                            "name": "deploymentDetailsText",
+                            "type": "Microsoft.Common.InfoBox",
+                            "visible": true,
+                            "options": {
+                                "text": "This deployment will create an Azure Key Vault, 2 custom roles ('Application' and 'Infrastructure'), and a service principal used for Prosimo orchestration. The 'Application Role' will be scoped to the management group selected on this step. It is recommended to scope this to a top level management group so that any downstream subscription may be easily onboarded.",
+                                "style": "Info"
+                            }
+                        },   
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope"
+                        },
+                        {
+                            "name": "deploymentDetails",
+                            "label": "Deployment Details",
+                            "type": "Microsoft.Common.Section",
+                            "visible": true,
+                            "elements": [
+                                {
+                                    "name": "infoBoxDeploymentDetails",
+                                    "type": "Microsoft.Common.InfoBox",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Choose a subscription to scope the 'Infrastructure' role and create the Key Vault. This subscription will be where Prosimo Edges will be deployed. It is recommended to use a 'Connectivity' or 'Transit' subscription for this step.",
+                                        "style": "Info"
+                                    }
+                                },
+                                {
+                                    "name": "subscriptionApi",
+                                    "type": "Microsoft.Solutions.ArmApiControl",
+                                    "request": {
+                                        "method": "GET",
+                                        "path": "subscriptions?api-version=2020-01-01"
+                                    }
+                                },
+                                {
+                                    "name": "subscriptionId",
+                                    "label": "Subscription",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "visible": true,
+                                    "defaultValue": "",
+                                    "toolTip": "Choose subscription for Prosimo Infrastructure Role Assignment.",
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "filter": true,
+                                    "filterPlaceholder": "Filter items ...",
+                                    "multiLine": true,
+                                    "constraints": {
+                                        "allowedValues": "[map(steps('basics').deploymentDetails.subscriptionApi.value, (item) => parse(concat('{\"label\":\"', item.displayName, '\",\"value\":\"', item.id, '\",\"description\":\"', 'ID: ', item.subscriptionId, '\"}')))]",
+                                        "required": true
+                                    }
+                                },
+                                {
+                                    "name": "ServicePrincipal",
+                                    "type": "Microsoft.Common.ServicePrincipalSelector",
+                                    "label": {
+                                        "password": "Password",
+                                        "certificateThumbprint": "Certificate thumbprint",
+                                        "authenticationType": "Authentication Type",
+                                        "sectionHeader": "Prosimo-AIR Service Principal"
+                                    },
+                                    "toolTip": {
+                                        "password": "Password",
+                                        "certificateThumbprint": "Certificate thumbprint",
+                                        "authenticationType": "Authentication Type"
+                                    },
+                                    "defaultValue": {
+                                        "principalId": "<default guid>",
+                                        "name": "(New) default App Id"
+                                    },
+                                    "constraints": {
+                                        "required": true
+                                    },
+                                    "options": {
+                                        "hideCertificate": false
+                                    },
+                                    "visible": true
+                                },
+                                {
+                                    "name": "infoBoxServicePrincipalWarning",
+                                    "type": "Microsoft.Common.InfoBox",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "If you do not see the name of your service principal after using 'Create New' choose 'Select Existing' and pick the service principal you just created.",
+                                        "style": "Warning"
+                                    }
+                                }
+
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "outputs": {
+            "parameters": {
+                "principalId": "[steps('basics').deploymentDetails.ServicePrincipal.objectId]",
+                "spPassword": "[steps('basics').deploymentDetails.ServicePrincipal.password]",
+                "appId": "[steps('basics').deploymentDetails.ServicePrincipal.appId]",
+                "managementGroupId": "[steps('basics').resourceScope.managementGroup.id]",
+                "managementGroupName": "[steps('basics').resourceScope.managementGroup.name]",
+                "subscriptionId": "[steps('basics').deploymentDetails.subscriptionId]"
+            },
+            "kind": "ManagementGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "managementGroupId": "[steps('basics').resourceScope.managementGroup.id]"
+        }        
+    }
+}

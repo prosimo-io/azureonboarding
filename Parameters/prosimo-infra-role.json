@@ -1,0 +1,53 @@
+{
+    "properties": {
+        "description": "Has required permissions for creating a prosimo edge in a subscription",
+        "roleName": "ProsimoEdgeRole",
+        "assignableScopes": [],
+        "permissions": [
+            {
+                "actions": [
+                    "Microsoft.Authorization/*/read",
+                    "Microsoft.Compute/*/read",
+                    "Microsoft.Compute/sshPublicKeys/write",
+                    "Microsoft.Compute/virtualMachines/*",
+                    "Microsoft.Compute/virtualMachineScaleSets/*",
+                    "Microsoft.ContainerService/*/read",
+                    "Microsoft.ContainerService/managedClusters/*",
+                    "Microsoft.ManagedIdentity/*/read",
+                    "Microsoft.Network/*/action",
+                    "Microsoft.Network/*/read",
+                    "Microsoft.Network/applicationGateways/*",
+                    "Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/*",
+                    "Microsoft.Network/customIpPrefixes/*",
+                    "Microsoft.Network/frontDoors/*",
+                    "Microsoft.Network/ipAllocations/*",
+                    "Microsoft.Network/ipGroups/*",
+                    "Microsoft.Network/loadBalancers/*",
+                    "Microsoft.Network/networkInterfaces/*",
+                    "Microsoft.Network/networkProfiles/*",
+                    "Microsoft.Network/networkSecurityGroups/*",
+                    "Microsoft.Network/privateDnsZones/*",
+                    "Microsoft.Network/privateEndpointRedirectMaps/*",
+                    "Microsoft.Network/privateEndpoints/*",
+                    "Microsoft.Network/privateLinkServices/*",
+                    "Microsoft.Network/publicIPAddresses/*",
+                    "Microsoft.Network/publicIPPrefixes/*",
+                    "Microsoft.Network/routeFilters/*",
+                    "Microsoft.Network/routeTables/*",
+                    "Microsoft.Network/serviceEndpointPolicies/*",
+                    "Microsoft.Network/virtualHubs/*",
+                    "Microsoft.Network/virtualNetworks/*",
+                    "Microsoft.Network/virtualWans/*",
+                    "Microsoft.Resources/*/read",
+                    "Microsoft.Resources/checkResourceName/action",
+                    "Microsoft.Resources/deployments/*",
+                    "Microsoft.Resources/subscriptions/resourceGroups/*",
+                    "Microsoft.Resources/tags/*"
+                ],
+                "dataActions": [],
+                "notActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
