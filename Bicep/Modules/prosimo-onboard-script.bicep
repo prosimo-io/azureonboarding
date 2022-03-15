@@ -24,7 +24,7 @@ resource script 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   }
   properties: {
     azPowerShellVersion: '7.3'
-    cleanupPreference: 'OnExpiration'
+    cleanupPreference: 'Always'
     retentionInterval: 'P1D'
     timeout: 'PT1H'
     arguments: '-prosimoTeamName \'${prosimoTeamName}\' -managementGroupName \'${managementGroupName}\' -tenantId \'${tenantId}\' -keyVaultName \'${keyVaultName}\' -ApiKvSecretName \'${ApiKvSecretName}\' -ClientIdKvSecretName \'${ClientIdKvSecretName}\' -PrincipalKvSecretName \'${PrincipalKvSecretName}\' '
