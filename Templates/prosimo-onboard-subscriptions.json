@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1318.3566",
-      "templateHash": "17830183653222613482"
+      "templateHash": "6900257366002907091"
     }
   },
   "parameters": {
@@ -16,19 +16,11 @@
     "prosimoTeamName": {
       "type": "string"
     },
-    "prosimoApiToken": {
-      "type": "string"
-    },
     "keyVaultId": {
       "type": "string"
     },
-    "clientId": {
-      "type": "string",
-      "defaultValue": "prosimoSPClientId"
-    },
-    "clientSecret": {
-      "type": "string",
-      "defaultValue": "prosimoSPpassword"
+    "prosimoApiToken": {
+      "type": "string"
     },
     "managementGroupName": {
       "type": "string"
@@ -47,13 +39,227 @@
     "resourceGroupName": "[format('rg-prosimo-{0}', take(guid(variables('subscriptionGuid')), 8))]",
     "keyVaultName": "[split(parameters('keyVaultId'), '/')[8]]",
     "subscriptionGuid": "[replace(parameters('subscriptionId'), '/subscriptions/', '')]",
-    "prosimoApiSecret": "prosimoApiPassword",
-    "tags": {
-      "Prosimo Team Name": "[parameters('prosimoTeamName')]",
-      "Purpose": "Used to store Service Principal ID and secret for Prosimo orchestration"
+    "ApiKvSecretName": "prosimoApiPassword",
+    "managedIdentityName": "prosimo-sub-onboard",
+    "rgTags": {
+      "Prosimo Login": "[format('https://{0}.admin.prosimo.io/', parameters('prosimoTeamName'))]",
+      "Prosimo API": "[format('https://{0}.admin.prosimo.io/apidocs/team/index.html', parameters('prosimoTeamName'))]",
+      "Purpose": "Used to store Key Vault and Managed Identity for Prosimo Onboarding",
+      "Deployed from": "https://github.com/prosimo-io/azureonboarding"
+    },
+    "identityTags": {
+      "Prosimo Login": "[format('https://{0}.admin.prosimo.io/', parameters('prosimoTeamName'))]",
+      "Prosimo API": "[format('https://{0}.admin.prosimo.io/apidocs/team/index.html', parameters('prosimoTeamName'))]",
+      "Purpose": "Used to access Key Vault to onboard Prosimo subscriptions",
+      "IAM Permissions": "[format('Reader at {0}, Deployment Script at {1}', parameters('managementGroupName'), variables('resourceGroupName'))]",
+      "Key Vault": "[parameters('keyVaultId')]",
+      "Key Vault Permissions": "Secret: Get, List, Set"
+    },
+    "keyVaultTags": {
+      "Prosimo Login": "[format('https://{0}.admin.prosimo.io/', parameters('prosimoTeamName'))]",
+      "Prosimo API": "[format('https://{0}.admin.prosimo.io/apidocs/team/index.html', parameters('prosimoTeamName'))]",
+      "Purpose": "Used to store Service Principal ID, SP Password, and Prosimo API token"
     }
   },
   "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('updateRgTags-{0}', parameters('time'))]",
+      "subscriptionId": "[variables('subscriptionGuid')]",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "tags": {
+            "value": "[variables('rgTags')]"
+          },
+          "resourceGroupName": {
+            "value": "[variables('resourceGroupName')]"
+          },
+          "subscriptionId": {
+            "value": "[variables('subscriptionGuid')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "9517886629503272679"
+            }
+          },
+          "parameters": {
+            "tags": {
+              "type": "object"
+            },
+            "subscriptionId": {
+              "type": "string"
+            },
+            "resourceGroupName": {
+              "type": "string"
+            },
+            "time": {
+              "type": "string",
+              "defaultValue": "[utcNow()]"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "[format('tagRg-{0}', parameters('time'))]",
+              "subscriptionId": "[parameters('subscriptionId')]",
+              "resourceGroup": "[parameters('resourceGroupName')]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5541114349496661324"
+                    }
+                  },
+                  "parameters": {
+                    "tags": {
+                      "type": "object"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Resources/tags",
+                      "apiVersion": "2021-04-01",
+                      "name": "default",
+                      "properties": {
+                        "tags": "[parameters('tags')]"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('updateIdentityTags-{0}', parameters('time'))]",
+      "subscriptionId": "[variables('subscriptionGuid')]",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "tags": {
+            "value": "[variables('identityTags')]"
+          },
+          "identityName": {
+            "value": "[variables('managedIdentityName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "7878247022655600505"
+            }
+          },
+          "parameters": {
+            "tags": {
+              "type": "object"
+            },
+            "identityName": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/tags",
+              "apiVersion": "2021-04-01",
+              "scope": "[format('Microsoft.ManagedIdentity/userAssignedIdentities/{0}', parameters('identityName'))]",
+              "name": "default",
+              "properties": {
+                "tags": "[parameters('tags')]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('updateKvTags-{0}', parameters('time'))]",
+      "subscriptionId": "[variables('subscriptionGuid')]",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "keyVaultName": {
+            "value": "[variables('keyVaultName')]"
+          },
+          "tags": {
+            "value": "[variables('keyVaultTags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "3993654835792034773"
+            }
+          },
+          "parameters": {
+            "tags": {
+              "type": "object"
+            },
+            "keyVaultName": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/tags",
+              "apiVersion": "2021-04-01",
+              "scope": "[format('Microsoft.KeyVault/vaults/{0}', parameters('keyVaultName'))]",
+              "name": "default",
+              "properties": {
+                "tags": "[parameters('tags')]"
+              }
+            }
+          ]
+        }
+      }
+    },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
@@ -70,7 +276,7 @@
             "value": "[variables('keyVaultName')]"
           },
           "secretName": {
-            "value": "[variables('prosimoApiSecret')]"
+            "value": "[variables('ApiKvSecretName')]"
           },
           "secretValue": {
             "value": "[parameters('prosimoApiToken')]"
@@ -192,73 +398,6 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "[format('managedIdentity-{0}', parameters('time'))]",
-      "subscriptionId": "[variables('subscriptionGuid')]",
-      "resourceGroup": "[variables('resourceGroupName')]",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "identityName": {
-            "value": "prosimo-sub-onboard"
-          },
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "tags": {
-            "value": "[variables('tags')]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "9602419024883774685"
-            }
-          },
-          "parameters": {
-            "identityName": {
-              "type": "string"
-            },
-            "location": {
-              "type": "string",
-              "defaultValue": "[resourceGroup().location]"
-            },
-            "tags": {
-              "type": "object",
-              "defaultValue": {}
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-              "apiVersion": "2018-11-30",
-              "name": "[parameters('identityName')]",
-              "location": "[parameters('location')]",
-              "tags": "[parameters('tags')]"
-            }
-          ],
-          "outputs": {
-            "identityResourceId": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('identityName'))]"
-            },
-            "identityPrincipalId": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('identityName'))).principalId]"
-            }
-          }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-10-01",
       "name": "[format('assignMgtReader-{0}', parameters('time'))]",
       "location": "[deployment().location]",
       "properties": {
@@ -268,7 +407,7 @@
         "mode": "Incremental",
         "parameters": {
           "principalId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityPrincipalId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30').principalId]"
           },
           "principalType": {
             "value": "ServicePrincipal"
@@ -277,7 +416,7 @@
             "value": "[variables('reader')]"
           },
           "assignmentGuid": {
-            "value": "[guid(managementGroup().id, variables('reader'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityResourceId.value)]"
+            "value": "[guid(managementGroup().id, variables('reader'), extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')))]"
           }
         },
         "template": {
@@ -317,10 +456,7 @@
             }
           ]
         }
-      },
-      "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -335,7 +471,7 @@
         "mode": "Incremental",
         "parameters": {
           "principalId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityPrincipalId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30').principalId]"
           },
           "principalType": {
             "value": "ServicePrincipal"
@@ -344,7 +480,7 @@
             "value": "[variables('reader')]"
           },
           "assignmentGuid": {
-            "value": "[guid(subscriptionResourceId(variables('subscriptionGuid'), 'Microsoft.Resources/resourceGroups', variables('resourceGroupName')), variables('reader'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityResourceId.value)]"
+            "value": "[guid(subscriptionResourceId(variables('subscriptionGuid'), 'Microsoft.Resources/resourceGroups', variables('resourceGroupName')), variables('reader'), extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')))]"
           }
         },
         "template": {
@@ -384,10 +520,7 @@
             }
           ]
         }
-      },
-      "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -402,7 +535,7 @@
         "mode": "Incremental",
         "parameters": {
           "principalId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityPrincipalId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30').principalId]"
           },
           "principalType": {
             "value": "ServicePrincipal"
@@ -411,7 +544,7 @@
             "value": "[reference(subscriptionResourceId(variables('subscriptionGuid'), 'Microsoft.Resources/deployments', format('scriptRole-{0}', parameters('time')))).outputs.roleId.value]"
           },
           "assignmentGuid": {
-            "value": "[guid(parameters('subscriptionId'), variables('reader'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityResourceId.value)]"
+            "value": "[guid(parameters('subscriptionId'), variables('reader'), extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')))]"
           }
         },
         "template": {
@@ -453,7 +586,6 @@
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))]",
         "[subscriptionResourceId(variables('subscriptionGuid'), 'Microsoft.Resources/deployments', format('scriptRole-{0}', parameters('time')))]"
       ]
     },
@@ -469,20 +601,11 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "clientId": {
-            "value": "[parameters('clientId')]"
-          },
-          "clientSecret": {
-            "value": "[parameters('clientSecret')]"
-          },
           "identityId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))).outputs.identityResourceId.value]"
+            "value": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName'))]"
           },
           "name": {
             "value": "prosimo-onboard-subscriptions"
-          },
-          "prosimoApiToken": {
-            "value": "[variables('prosimoApiSecret')]"
           },
           "prosimoTeamName": {
             "value": "[parameters('prosimoTeamName')]"
@@ -504,7 +627,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1318.3566",
-              "templateHash": "6824251606805621523"
+              "templateHash": "14474313212876254042"
             }
           },
           "parameters": {
@@ -521,15 +644,6 @@
             "prosimoTeamName": {
               "type": "string"
             },
-            "prosimoApiToken": {
-              "type": "string"
-            },
-            "clientId": {
-              "type": "string"
-            },
-            "clientSecret": {
-              "type": "string"
-            },
             "keyVaultName": {
               "type": "string"
             },
@@ -538,6 +652,9 @@
             }
           },
           "variables": {
+            "ApiKvSecretName": "prosimoApiPassword",
+            "ClientIdKvSecretName": "prosimoSPClientId",
+            "PrincipalKvSecretName": "prosimoSPpassword",
             "tenantId": "[tenant().tenantId]",
             "scriptUrl": "https://raw.githubusercontent.com/prosimo-io/azureonboarding/main/PowerShell/onboard-cloud-account.ps1"
           },
@@ -556,10 +673,10 @@
               },
               "properties": {
                 "azPowerShellVersion": "7.3",
-                "cleanupPreference": "OnExpiration",
+                "cleanupPreference": "Always",
                 "retentionInterval": "P1D",
                 "timeout": "PT1H",
-                "arguments": "[format('-prosimoTeamName ''{0}'' -prosimoApiToken ''{1}'' -clientId ''{2}'' -managementGroupName ''{3}'' -tenantId ''{4}'' -clientSecret ''{5}'' -keyVaultName ''{6}'' ', parameters('prosimoTeamName'), parameters('prosimoApiToken'), parameters('clientId'), parameters('managementGroupName'), variables('tenantId'), parameters('clientSecret'), parameters('keyVaultName'))]",
+                "arguments": "[format('-prosimoTeamName ''{0}'' -managementGroupName ''{1}'' -tenantId ''{2}'' -keyVaultName ''{3}'' -ApiKvSecretName ''{4}'' -ClientIdKvSecretName ''{5}'' -PrincipalKvSecretName ''{6}'' ', parameters('prosimoTeamName'), parameters('managementGroupName'), variables('tenantId'), parameters('keyVaultName'), variables('ApiKvSecretName'), variables('ClientIdKvSecretName'), variables('PrincipalKvSecretName'))]",
                 "primaryScriptUri": "[variables('scriptUrl')]"
               }
             }
@@ -573,11 +690,10 @@
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('addApi-{0}', parameters('time')))]",
         "[extensionResourceId(managementGroup().id, 'Microsoft.Resources/deployments', format('assignMgtReader-{0}', parameters('time')))]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('assignRgReader-{0}', parameters('time')))]",
         "[subscriptionResourceId(variables('subscriptionGuid'), 'Microsoft.Resources/deployments', format('assignScriptRole-{0}', parameters('time')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('managedIdentity-{0}', parameters('time')))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionGuid'), variables('resourceGroupName')), 'Microsoft.Resources/deployments', format('addApi-{0}', parameters('time')))]"
       ]
     }
   ]

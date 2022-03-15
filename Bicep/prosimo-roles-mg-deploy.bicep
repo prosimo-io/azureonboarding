@@ -10,17 +10,24 @@ param spPassword string
 param time string = utcNow()
 param location string = deployment().location
 
+var tenantId = tenant().tenantId
 var prosimoAppRoleDefinition = json(loadTextContent('../Parameters/prosimo-app-role.json'))
 var prosimoInfraRoleDefinition = json(loadTextContent('../Parameters/prosimo-infra-role.json'))
 var prosimoServicePrincipal = principalId[0]
 var subscriptionGuid = replace(subscriptionId, '/subscriptions/', '')
 var resourceGroupName = 'rg-prosimo-${take(guid(subscriptionGuid), 8)}'
+var managedIdentityName = 'prosimo-sub-onboard'
 var keyVaultName = 'kv-prosimo'
 var secretNameClientId = 'prosimoSPClientId'
 var secretNameClientPassword = 'prosimoSPpassword'
 var tags = {
-  'Prosimo Login URL': 'https://admin.prosimo.io/signin'
-  'Purpose': 'Used to store Service Principal ID and secret for Prosimo orchestration'
+  'Prosimo Login': 'https://admin.prosimo.io/signin'
+  'Purpose': 'Used to store Key Vault and Managed Identity for Prosimo Onboarding'
+  'Deployed from': 'https://github.com/prosimo-io/azureonboarding'
+}
+var identityTags = {
+  'Purpose': 'Used to access Key Vault to onboard Prosimo subscriptions'
+  'Key Vault Permissions': 'Secret: Get, List, Set'
 }
 
 module prosimoAppRole './Modules/define-role-mgt-scope.bicep' = {
@@ -82,9 +89,9 @@ module managedIdentity './Modules/managed-identity.bicep' = {
   ]
   name: 'managedIdentity-${time}'
   params: {
-    identityName: 'prosimo-sub-onboard'
+    identityName: managedIdentityName
     location: location
-    tags: tags
+    tags: identityTags
   }
 }
 
@@ -96,9 +103,13 @@ module keyVault 'Modules/keyvault.bicep' = {
     objectId: managedIdentity.outputs.identityPrincipalId
     enabledForDeployment: true
     enabledForTemplateDeployment: true
-    principalType: 'ServicePrincipal'
-    roleName: 'Key Vault Secrets Officer'
     location: location
+    secretPermissions: [
+      'get'
+      'list'
+      'set'
+    ]
+    tenantId: tenantId
   }
 }
 
