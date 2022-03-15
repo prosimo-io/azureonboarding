@@ -12,8 +12,8 @@ $apiUrl = "https://" + $prosimoTeamName + ".admin.prosimo.io/api/cloud/creds"
 $vaultUrl = "https://" + $keyVaultName + ".vault.azure.net"
 
 $prosimoApiSecretURI = $vaultUrl + '/secrets/' + $ApiKvSecretName + '?api-version=2016-10-01'
-$clientSecretUri = $vaultUrl + '/secrets/' + $clientId + '?api-version=2016-10-01'
-$spSecretURI = $vaultUrl + '/secrets/' + $clientSecret + '?api-version=2016-10-01'
+$clientSecretUri = $vaultUrl + '/secrets/' + $ClientIdKvSecretName + '?api-version=2016-10-01'
+$spSecretURI = $vaultUrl + '/secrets/' + $PrincipalKvSecretName + '?api-version=2016-10-01'
 
 #// Retreive access token from Azure Instance Metadata service via User Managed Identity assigned to script resource with access to Azure Key Vault 
 $Response = Invoke-RestMethod -Uri 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net' -Method GET -Headers @{Metadata='true'}
@@ -25,7 +25,7 @@ $clientSecret = (Invoke-RestMethod -Uri $spSecretURI -Method GET -Headers @{Auth
 $ApiToken = (Invoke-RestMethod -Uri $prosimoApiSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
 
 #// Check to see if Azure Resource Graph module is loaded and load if not
-If (-not (Get-Module -Name Az.ResourceGraph)) { Install-Module -Name Az.ResourceGraph -Force }
+If (-not (Get-Module -Name Az.ResourceGraph)) { Import-Module -Name Az.ResourceGraph -Force }
 
 #// Search Azure Resource Graph for all subscriptions in a management group
 $subscriptionList = (Search-AzGraph -Query "ResourceContainers | where type =~ 'microsoft.resources/subscriptions'" -ManagementGroup $managementGroupName).id
