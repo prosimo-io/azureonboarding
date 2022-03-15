@@ -2,10 +2,8 @@ targetScope = 'managementGroup'
 
 param location string = deployment().location
 param prosimoTeamName string
-param prosimoApiToken string
 param keyVaultId string
-param clientId string = 'prosimoSPClientId'
-param clientSecret string = 'prosimoSPpassword'
+param prosimoApiToken string
 param managementGroupName string
 param subscriptionId string
 param time string = utcNow()
@@ -15,7 +13,7 @@ var reader = '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-4
 var resourceGroupName = 'rg-prosimo-${take(guid(subscriptionGuid), 8)}'
 var keyVaultName = split(keyVaultId, '/')[8]
 var subscriptionGuid = replace(subscriptionId, '/subscriptions/', '')
-var prosimoApiSecret = 'prosimoApiPassword'
+var ApiKvSecretName = 'prosimoApiPassword'
 var tags = {
   'Prosimo Team Name': prosimoTeamName
   'Purpose': 'Used to store Service Principal ID and secret for Prosimo orchestration'
@@ -26,12 +24,12 @@ resource scriptResourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' exi
   name: resourceGroupName
 }
 
-module addProsimoApi 'Modules/keyvault-secret.bicep' = {
+module createApiKvSecret 'Modules/keyvault-secret.bicep' = {
   scope: scriptResourceGroup
   name: 'addApi-${time}'
   params: {
     keyVaultName: keyVaultName
-    secretName: prosimoApiSecret
+    secretName: ApiKvSecretName
     secretValue: prosimoApiToken
   }
 }
@@ -102,15 +100,12 @@ module onboardSubscriptions './Modules/prosimo-onboard-script.bicep' = {
     assignScriptRole
     assignRgReaderRole
     assignMgtReaderRole
-    addProsimoApi
+    createApiKvSecret
   ]
   name: 'onboardSubs-${time}'
   params: {
-    clientId: clientId
-    clientSecret: clientSecret
     identityId: createIdentity.outputs.identityResourceId
     name: 'prosimo-onboard-subscriptions'
-    prosimoApiToken: prosimoApiSecret
     prosimoTeamName: prosimoTeamName
     managementGroupName: managementGroupName
     location: location
