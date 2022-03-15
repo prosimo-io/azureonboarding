@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1318.3566",
-      "templateHash": "12840448021321260151"
+      "templateHash": "6900257366002907091"
     }
   },
   "parameters": {
@@ -627,7 +627,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1318.3566",
-              "templateHash": "12228557765189887045"
+              "templateHash": "14474313212876254042"
             }
           },
           "parameters": {
@@ -656,7 +656,7 @@
             "ClientIdKvSecretName": "prosimoSPClientId",
             "PrincipalKvSecretName": "prosimoSPpassword",
             "tenantId": "[tenant().tenantId]",
-            "scriptUrl": "https://raw.githubusercontent.com/prosimo-io/azureonboarding/em-checkapifirst/PowerShell/onboard-cloud-account.ps1"
+            "scriptUrl": "https://raw.githubusercontent.com/prosimo-io/azureonboarding/main/PowerShell/onboard-cloud-account.ps1"
           },
           "resources": [
             {

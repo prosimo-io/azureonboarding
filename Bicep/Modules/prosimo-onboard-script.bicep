@@ -10,7 +10,7 @@ var ClientIdKvSecretName = 'prosimoSPClientId'
 var PrincipalKvSecretName = 'prosimoSPpassword'
 
 var tenantId = tenant().tenantId
-var scriptUrl = 'https://raw.githubusercontent.com/prosimo-io/azureonboarding/em-checkapifirst/PowerShell/onboard-cloud-account.ps1'
+var scriptUrl = 'https://raw.githubusercontent.com/prosimo-io/azureonboarding/main/PowerShell/onboard-cloud-account.ps1'
 
 resource script 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: name
