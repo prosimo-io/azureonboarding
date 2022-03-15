@@ -36,6 +36,9 @@ $headers = @{
   "Prosimo-ApiToken" = $ApiToken
 }
 
+Write-Host "This is the prosimo token"
+Write-Host $ApiToken
+
 #// Retreive existing Azure Prosimo subscriptions
 $existingAccounts = Invoke-RestMethod -Method Get -Uri $apiUrl -Headers $headers
 
