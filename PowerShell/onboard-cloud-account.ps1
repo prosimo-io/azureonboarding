@@ -25,7 +25,7 @@ $clientSecret = (Invoke-RestMethod -Uri $spSecretURI -Method GET -Headers @{Auth
 $ApiToken = (Invoke-RestMethod -Uri $prosimoApiSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
 
 #// Check to see if Azure Resource Graph module is loaded and load if not
-If (-not (Get-Module -Name Az.ResourceGraph)) { Import-Module -Name Az.ResourceGraph -Force }
+If (-not (Get-Module -Name Az.ResourceGraph)) { Install-Module -Name Az.ResourceGraph -Force }
 
 #// Search Azure Resource Graph for all subscriptions in a management group
 $subscriptionList = (Search-AzGraph -Query "ResourceContainers | where type =~ 'microsoft.resources/subscriptions'" -ManagementGroup $managementGroupName).id
