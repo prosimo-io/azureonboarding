@@ -9,7 +9,7 @@ param(
 )
 
 $apiUrl = "https://" + $prosimoTeamName + ".admin.prosimo.io/api/cloud/creds"
-$vaultUrl = "https://$keyVaultName.vault.azure.net"
+$vaultUrl = "https://" + $keyVaultName + ".vault.azure.net"
 
 $prosimoApiSecretURI = $vaultUrl + '/secrets/' + $ApiKvSecretName + '?api-version=2016-10-01'
 $clientSecretUri = $vaultUrl + '/secrets/' + $clientId + '?api-version=2016-10-01'
@@ -19,6 +19,7 @@ $spSecretURI = $vaultUrl + '/secrets/' + $clientSecret + '?api-version=2016-10-0
 $Response = Invoke-RestMethod -Uri 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net' -Method GET -Headers @{Metadata='true'}
 $KeyVaultToken = $Response.access_token
 
+#// Retreive passwords from Key Vault using access token
 $clientId = (Invoke-RestMethod -Uri $clientSecretUri -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
 $clientSecret = (Invoke-RestMethod -Uri $spSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
 $ApiToken = (Invoke-RestMethod -Uri $prosimoApiSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
@@ -29,6 +30,7 @@ If (-not (Get-Module -Name Az.ResourceGraph)) { Install-Module -Name Az.Resource
 #// Search Azure Resource Graph for all subscriptions in a management group
 $subscriptionList = (Search-AzGraph -Query "ResourceContainers | where type =~ 'microsoft.resources/subscriptions'" -ManagementGroup $managementGroupName).id
 
+#// Build Prosimo API header using API token
 $headers = @{
   "content-type" = 'application/json'
   "Prosimo-ApiToken" = $ApiToken
