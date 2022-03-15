@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1318.3566",
-      "templateHash": "6900257366002907091"
+      "templateHash": "6083517754694820768"
     }
   },
   "parameters": {
@@ -627,7 +627,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1318.3566",
-              "templateHash": "14474313212876254042"
+              "templateHash": "1819787392521237387"
             }
           },
           "parameters": {
@@ -673,7 +673,7 @@
               },
               "properties": {
                 "azPowerShellVersion": "7.3",
-                "cleanupPreference": "Always",
+                "cleanupPreference": "OnSuccess",
                 "retentionInterval": "P1D",
                 "timeout": "PT1H",
                 "arguments": "[format('-prosimoTeamName ''{0}'' -managementGroupName ''{1}'' -tenantId ''{2}'' -keyVaultName ''{3}'' -ApiKvSecretName ''{4}'' -ClientIdKvSecretName ''{5}'' -PrincipalKvSecretName ''{6}'' ', parameters('prosimoTeamName'), parameters('managementGroupName'), variables('tenantId'), parameters('keyVaultName'), variables('ApiKvSecretName'), variables('ClientIdKvSecretName'), variables('PrincipalKvSecretName'))]",
