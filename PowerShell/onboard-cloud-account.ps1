@@ -8,6 +8,7 @@ param(
   [string] [Parameter(Mandatory=$true)] $PrincipalKvSecretName
 )
 
+$apiUrl = "https://" + $prosimoTeamName + ".admin.prosimo.io/api/cloud/creds"
 $vaultUrl = "https://$keyVaultName.vault.azure.net"
 
 $prosimoApiSecretURI = $vaultUrl + '/secrets/' + $ApiKvSecretName + '?api-version=2016-10-01'
@@ -20,7 +21,7 @@ $KeyVaultToken = $Response.access_token
 
 $clientId = (Invoke-RestMethod -Uri $clientSecretUri -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
 $clientSecret = (Invoke-RestMethod -Uri $spSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
-$ApiKvSecretName = (Invoke-RestMethod -Uri $prosimoApiSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
+$ApiToken = (Invoke-RestMethod -Uri $prosimoApiSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
 
 #// Check to see if Azure Resource Graph module is loaded and load if not
 If (-not (Get-Module -Name Az.ResourceGraph)) { Install-Module -Name Az.ResourceGraph -Force }
@@ -30,10 +31,8 @@ $subscriptionList = (Search-AzGraph -Query "ResourceContainers | where type =~ '
 
 $headers = @{
   "content-type" = 'application/json'
-  "Prosimo-ApiToken" = $ApiKvSecretName
+  "Prosimo-ApiToken" = $ApiToken
 }
-
-$apiUrl = "https://" + $prosimoTeamName + ".admin.prosimo.io/api/cloud/creds"
 
 #// Retreive existing Azure Prosimo subscriptions
 $existingAccounts = Invoke-RestMethod -Method Get -Uri $apiUrl -Headers $headers
