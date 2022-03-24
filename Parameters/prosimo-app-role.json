@@ -26,6 +26,7 @@
                     "Microsoft.Network/publicIPAddresses/*",
                     "Microsoft.Network/publicIPPrefixes/*",
                     "Microsoft.Network/privateDnsZones/*",
+                    "Microsoft.Network/privateEndpoints/*",
                     "Microsoft.Network/privateEndpointRedirectMaps/*",
                     "Microsoft.Network/privateLinkServices/*",
                     "Microsoft.Network/virtualNetworks/*",
