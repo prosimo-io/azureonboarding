@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.4.1318.3566",
-      "templateHash": "16868770684066868096"
+      "version": "0.5.6.12127",
+      "templateHash": "17911283198459117484"
     }
   },
   "parameters": {
@@ -38,7 +38,7 @@
   },
   "variables": {
     "tenantId": "[tenant().tenantId]",
-    "prosimoAppRoleDefinition": "[json('{\n    \"properties\": {\n        \"roleName\": \"ProsimoAppRole\",\n        \"description\": \"Has required permissions to onboard apps in a customer''s subscription\",\n        \"assignableScopes\": [],\n        \"permissions\": [\n            {\n                \"actions\": [\n                    \"Microsoft.Resources/tags/*\",\n                    \"Microsoft.Resources/subscriptions/resourceGroups/*\",\n                    \"Microsoft.Resources/checkResourceName/action\",\n                    \"Microsoft.Resources/*/read\",\n                    \"Microsoft.Authorization/*/read\",\n                    \"Microsoft.ManagedIdentity/*/read\",\n                    \"Microsoft.Compute/*/read\",\n                    \"Microsoft.Network/*/action\",\n                    \"Microsoft.Network/*/read\",\n                    \"Microsoft.Network/applicationGateways/*\",\n                    \"Microsoft.Network/customIpPrefixes/*\",\n                    \"Microsoft.Network/ipAllocations/*\",\n                    \"Microsoft.Network/ipGroups/*\",\n                    \"Microsoft.Network/loadBalancers/*\",\n                    \"Microsoft.Network/networkInterfaces/*\",\n                    \"Microsoft.Network/networkProfiles/*\",\n                    \"Microsoft.Network/networkSecurityGroups/*\",\n                    \"Microsoft.Network/publicIPAddresses/*\",\n                    \"Microsoft.Network/publicIPPrefixes/*\",\n                    \"Microsoft.Network/privateDnsZones/*\",\n                    \"Microsoft.Network/privateEndpoints/*\",\n                    \"Microsoft.Network/privateEndpointRedirectMaps/*\",\n                    \"Microsoft.Network/privateLinkServices/*\",\n                    \"Microsoft.Network/virtualNetworks/*\",\n                    \"Microsoft.Network/virtualHubs/*\",\n                    \"Microsoft.Network/virtualWans/*\",\n                    \"Microsoft.Network/serviceEndpointPolicies/*\",\n                    \"Microsoft.Network/routeTables/*\",\n                    \"Microsoft.Network/routeFilters/*\"\n                ],\n                \"notActions\": [],\n                \"dataActions\": [],\n                \"notDataActions\": []\n            }\n        ]\n    }\n}\n')]",
+    "prosimoAppRoleDefinition": "[json('{\n    \"properties\": {\n        \"roleName\": \"ProsimoAppRole\",\n        \"description\": \"Has required permissions to onboard apps in a customer''s subscription\",\n        \"assignableScopes\": [],\n        \"permissions\": [\n            {\n                \"actions\": [\n                    \"Microsoft.Resources/tags/*\",\n                    \"Microsoft.Resources/subscriptions/resourceGroups/*\",\n                    \"Microsoft.Resources/checkResourceName/action\",\n                    \"Microsoft.Resources/*/read\",\n                    \"Microsoft.Authorization/*/read\",\n                    \"Microsoft.ManagedIdentity/*/read\",\n                    \"Microsoft.Compute/*/read\",\n                    \"Microsoft.Compute/sshPublicKeys/*\",\n                    \"Microsoft.Network/*/action\",\n                    \"Microsoft.Network/*/read\",\n                    \"Microsoft.Network/applicationGateways/*\",\n                    \"Microsoft.Network/customIpPrefixes/*\",\n                    \"Microsoft.Network/ipAllocations/*\",\n                    \"Microsoft.Network/ipGroups/*\",\n                    \"Microsoft.Network/loadBalancers/*\",\n                    \"Microsoft.Network/networkInterfaces/*\",\n                    \"Microsoft.Network/networkProfiles/*\",\n                    \"Microsoft.Network/networkSecurityGroups/*\",\n                    \"Microsoft.Network/publicIPAddresses/*\",\n                    \"Microsoft.Network/publicIPPrefixes/*\",\n                    \"Microsoft.Network/privateDnsZones/*\",\n                    \"Microsoft.Network/privateEndpoints/*\",\n                    \"Microsoft.Network/privateEndpointRedirectMaps/*\",\n                    \"Microsoft.Network/privateLinkServices/*\",\n                    \"Microsoft.Network/virtualNetworks/*\",\n                    \"Microsoft.Network/virtualHubs/*\",\n                    \"Microsoft.Network/virtualWans/*\",\n                    \"Microsoft.Network/serviceEndpointPolicies/*\",\n                    \"Microsoft.Network/routeTables/*\",\n                    \"Microsoft.Network/routeFilters/*\"\n                ],\n                \"notActions\": [],\n                \"dataActions\": [],\n                \"notDataActions\": []\n            }\n        ]\n    }\n}\n')]",
     "prosimoInfraRoleDefinition": "[json('{\n    \"properties\": {\n        \"description\": \"Has required permissions for creating a prosimo edge in a subscription\",\n        \"roleName\": \"ProsimoEdgeRole\",\n        \"assignableScopes\": [],\n        \"permissions\": [\n            {\n                \"actions\": [\n                    \"Microsoft.Authorization/*/read\",\n                    \"Microsoft.Compute/*/read\",\n                    \"Microsoft.Compute/sshPublicKeys/write\",\n                    \"Microsoft.Compute/virtualMachines/*\",\n                    \"Microsoft.Compute/virtualMachineScaleSets/*\",\n                    \"Microsoft.ContainerService/*/read\",\n                    \"Microsoft.ContainerService/managedClusters/*\",\n                    \"Microsoft.ManagedIdentity/*/read\",\n                    \"Microsoft.Network/*/action\",\n                    \"Microsoft.Network/*/read\",\n                    \"Microsoft.Network/applicationGateways/*\",\n                    \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/*\",\n                    \"Microsoft.Network/customIpPrefixes/*\",\n                    \"Microsoft.Network/frontDoors/*\",\n                    \"Microsoft.Network/ipAllocations/*\",\n                    \"Microsoft.Network/ipGroups/*\",\n                    \"Microsoft.Network/loadBalancers/*\",\n                    \"Microsoft.Network/networkInterfaces/*\",\n                    \"Microsoft.Network/networkProfiles/*\",\n                    \"Microsoft.Network/networkSecurityGroups/*\",\n                    \"Microsoft.Network/privateDnsZones/*\",\n                    \"Microsoft.Network/privateEndpointRedirectMaps/*\",\n                    \"Microsoft.Network/privateEndpoints/*\",\n                    \"Microsoft.Network/privateLinkServices/*\",\n                    \"Microsoft.Network/publicIPAddresses/*\",\n                    \"Microsoft.Network/publicIPPrefixes/*\",\n                    \"Microsoft.Network/routeFilters/*\",\n                    \"Microsoft.Network/routeTables/*\",\n                    \"Microsoft.Network/serviceEndpointPolicies/*\",\n                    \"Microsoft.Network/virtualHubs/*\",\n                    \"Microsoft.Network/virtualNetworks/*\",\n                    \"Microsoft.Network/virtualWans/*\",\n                    \"Microsoft.Resources/*/read\",\n                    \"Microsoft.Resources/checkResourceName/action\",\n                    \"Microsoft.Resources/deployments/*\",\n                    \"Microsoft.Resources/subscriptions/resourceGroups/*\",\n                    \"Microsoft.Resources/tags/*\"\n                ],\n                \"dataActions\": [],\n                \"notActions\": [],\n                \"notDataActions\": []\n            }\n        ]\n    }\n}')]",
     "prosimoServicePrincipal": "[parameters('principalId')[0]]",
     "subscriptionGuid": "[replace(parameters('subscriptionId'), '/subscriptions/', '')]",
@@ -88,8 +88,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "1149213887469936114"
+              "version": "0.5.6.12127",
+              "templateHash": "1148867693831917820"
             }
           },
           "parameters": {
@@ -161,8 +161,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "10448395622682263845"
+              "version": "0.5.6.12127",
+              "templateHash": "6022235871795368219"
             }
           },
           "parameters": {
@@ -233,8 +233,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "16555602669376192237"
+              "version": "0.5.6.12127",
+              "templateHash": "6458325569807062476"
             }
           },
           "parameters": {
@@ -300,8 +300,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "2323977695226090064"
+              "version": "0.5.6.12127",
+              "templateHash": "4338909101750948078"
             }
           },
           "parameters": {
@@ -364,8 +364,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "9875894596214332740"
+              "version": "0.5.6.12127",
+              "templateHash": "15499243322349301486"
             }
           },
           "parameters": {
@@ -430,8 +430,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "9602419024883774685"
+              "version": "0.5.6.12127",
+              "templateHash": "4430896467460018742"
             }
           },
           "parameters": {
@@ -516,8 +516,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "18124408200786895612"
+              "version": "0.5.6.12127",
+              "templateHash": "5001081592721845066"
             }
           },
           "parameters": {
@@ -668,8 +668,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "11625835412610679373"
+              "version": "0.5.6.12127",
+              "templateHash": "17335811021784264529"
             }
           },
           "parameters": {
@@ -733,8 +733,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "11625835412610679373"
+              "version": "0.5.6.12127",
+              "templateHash": "17335811021784264529"
             }
           },
           "parameters": {

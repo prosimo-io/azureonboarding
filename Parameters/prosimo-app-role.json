@@ -13,6 +13,7 @@
                     "Microsoft.Authorization/*/read",
                     "Microsoft.ManagedIdentity/*/read",
                     "Microsoft.Compute/*/read",
+                    "Microsoft.Compute/sshPublicKeys/*",
                     "Microsoft.Network/*/action",
                     "Microsoft.Network/*/read",
                     "Microsoft.Network/applicationGateways/*",
