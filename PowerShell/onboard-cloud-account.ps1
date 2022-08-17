@@ -25,11 +25,13 @@ $clientSecret = (Invoke-RestMethod -Uri $spSecretURI -Method GET -Headers @{Auth
 $ApiToken = (Invoke-RestMethod -Uri $prosimoApiSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
 
 #// Unload pre-installed AZ module, install, and import the latest version
-Uninstall-Module -Name Az.Accounts
+#Uninstall-Module -Name Az.Accounts
 Install-Module -Name Az.Accounts -MinimumVersion 2.9.1 -Force -Scope AllUsers -AllowClobber
+Remove-Module -Name Az.Accounts
+Import-Module -Name Az.Accounts -MinimumVersion 2.9.1
 
 #// Check to see if Azure Resource Graph module is loaded and install if not
-If (-not (Get-Module -Name Az.ResourceGraph)) { Install-Module -Name Az.ResourceGraph -Force }
+If (-not (Get-Module -Name Az.ResourceGraph)) { Install-Module -Name Az.ResourceGraph -Force -AllowClobber }
 
 #// Search Azure Resource Graph for all subscriptions in a management group
 $subscriptionList = (Search-AzGraph -Query "ResourceContainers | where type =~ 'microsoft.resources/subscriptions'" -ManagementGroup $managementGroupName).id
