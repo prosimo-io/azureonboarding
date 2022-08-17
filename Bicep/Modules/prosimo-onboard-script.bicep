@@ -23,7 +23,7 @@ resource script 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     }
   }
   properties: {
-    azPowerShellVersion: '7.3'
+    azPowerShellVersion: '7.5'
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'
     timeout: 'PT1H'
