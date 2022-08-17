@@ -25,9 +25,9 @@ $clientSecret = (Invoke-RestMethod -Uri $spSecretURI -Method GET -Headers @{Auth
 $ApiToken = (Invoke-RestMethod -Uri $prosimoApiSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
 
 #// Unload pre-installed AZ module, install, and import the latest version
-Remove-Module Az -Force
-Install-Module -Name Az -Force
-Import-Module -Name Az -Force
+
+Install-Module -Name Az.Accounts -MinimumVersion 2.9.1 -Force -Scope AllUsers -AllowClobber
+Get-InstalledModule -Name Az.Accounts -AllVersions | select Name,Version
 
 #// Check to see if Azure Resource Graph module is loaded and install if not
 If (-not (Get-Module -Name Az.ResourceGraph)) { Install-Module -Name Az.ResourceGraph -Force }
