@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.4.1318.3566",
-      "templateHash": "6083517754694820768"
+      "version": "0.9.1.41621",
+      "templateHash": "10177993269661644336"
     }
   },
   "parameters": {
@@ -34,7 +34,8 @@
     }
   },
   "variables": {
-    "scriptRole": "[json('{\n    \"roleName\": \"prosimo-script-minimum-privilege-for-deployment-principal\",\n    \"description\": \"Configure least privilege for the deployment principal in deployment script\",\n    \"type\": \"customRole\",\n    \"IsCustom\": true,\n    \"permissions\": [\n      {\n        \"actions\": [\n          \"Microsoft.Storage/storageAccounts/*\",\n          \"Microsoft.ContainerInstance/containerGroups/*\",\n          \"Microsoft.Resources/deployments/*\",\n          \"Microsoft.Resources/deploymentScripts/*\"\n        ]\n      }\n    ],\n    \"assignableScopes\": [\n      \"[subscription().id]\"\n    ]\n  }')]",
+    "$fxv#0": "{\n    \"roleName\": \"prosimo-script-minimum-privilege-for-deployment-principal\",\n    \"description\": \"Configure least privilege for the deployment principal in deployment script\",\n    \"type\": \"customRole\",\n    \"IsCustom\": true,\n    \"permissions\": [\n      {\n        \"actions\": [\n          \"Microsoft.Storage/storageAccounts/*\",\n          \"Microsoft.ContainerInstance/containerGroups/*\",\n          \"Microsoft.Resources/deployments/*\",\n          \"Microsoft.Resources/deploymentScripts/*\"\n        ]\n      }\n    ],\n    \"assignableScopes\": [\n      \"[subscription().id]\"\n    ]\n  }",
+    "scriptRole": "[json(variables('$fxv#0'))]",
     "reader": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
     "resourceGroupName": "[format('rg-prosimo-{0}', take(guid(variables('subscriptionGuid')), 8))]",
     "keyVaultName": "[split(parameters('keyVaultId'), '/')[8]]",
@@ -90,8 +91,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "9517886629503272679"
+              "version": "0.9.1.41621",
+              "templateHash": "15248405821597455197"
             }
           },
           "parameters": {
@@ -132,8 +133,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1318.3566",
-                      "templateHash": "5541114349496661324"
+                      "version": "0.9.1.41621",
+                      "templateHash": "11876748450449818918"
                     }
                   },
                   "parameters": {
@@ -183,8 +184,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "7878247022655600505"
+              "version": "0.9.1.41621",
+              "templateHash": "14615361569093600128"
             }
           },
           "parameters": {
@@ -234,8 +235,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "3993654835792034773"
+              "version": "0.9.1.41621",
+              "templateHash": "11568668783620173841"
             }
           },
           "parameters": {
@@ -288,8 +289,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "11625835412610679373"
+              "version": "0.9.1.41621",
+              "templateHash": "368704232941232746"
             }
           },
           "parameters": {
@@ -353,8 +354,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "10448395622682263845"
+              "version": "0.9.1.41621",
+              "templateHash": "9465963696666440018"
             }
           },
           "parameters": {
@@ -425,8 +426,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "16555602669376192237"
+              "version": "0.9.1.41621",
+              "templateHash": "15884925999823174410"
             }
           },
           "parameters": {
@@ -489,8 +490,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "4991553664898485462"
+              "version": "0.9.1.41621",
+              "templateHash": "6406916499204599770"
             }
           },
           "parameters": {
@@ -553,8 +554,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "2323977695226090064"
+              "version": "0.9.1.41621",
+              "templateHash": "16575255511652050935"
             }
           },
           "parameters": {
@@ -626,8 +627,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1318.3566",
-              "templateHash": "1819787392521237387"
+              "version": "0.9.1.41621",
+              "templateHash": "17240755831832977753"
             }
           },
           "parameters": {
@@ -672,7 +673,7 @@
                 }
               },
               "properties": {
-                "azPowerShellVersion": "7.3",
+                "azPowerShellVersion": "7.5",
                 "cleanupPreference": "OnSuccess",
                 "retentionInterval": "P1D",
                 "timeout": "PT1H",
