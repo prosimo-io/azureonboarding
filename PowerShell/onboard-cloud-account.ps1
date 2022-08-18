@@ -8,6 +8,8 @@ param(
   [string] [Parameter(Mandatory=$true)] $PrincipalKvSecretName
 )
 
+$subscriptionList = @()
+
 $apiUrl = "https://" + $prosimoTeamName + ".admin.prosimo.io/api/cloud/creds"
 $vaultUrl = "https://" + $keyVaultName + ".vault.azure.net"
 
@@ -24,18 +26,20 @@ $clientId = (Invoke-RestMethod -Uri $clientSecretUri -Method GET -Headers @{Auth
 $clientSecret = (Invoke-RestMethod -Uri $spSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
 $ApiToken = (Invoke-RestMethod -Uri $prosimoApiSecretURI -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}).value
 
-#// Unload pre-installed AZ module, install, and import the latest version
-Remove-Module -Name Az.Accounts -Force
-Install-Module -Name Az.Accounts -MinimumVersion 2.9.1 -Force -Scope AllUsers -AllowClobber
-Import-Module  -Name Az.Accounts
-#Remove-Module -Name Az.Accounts
-#Import-Module -Name Az.Accounts -MinimumVersion 2.9.1
+#// Use PS to get management groups until issue with resource graph provdider in deployment script is resolved
+$mgtGroups = Get-AzManagementGroup -GroupId $managementGroupName -Expand -Recurse
+
+foreach ($child in $mgtGroups.Children) {
+  foreach ($sub in $child.Children ) {
+    $subscriptionList += $sub.Id
+  }
+}
 
 #// Check to see if Azure Resource Graph module is loaded and install if not
-If (-not (Get-Module -Name Az.ResourceGraph)) { Install-Module -Name Az.ResourceGraph -MinimumVersion 0.13.0 -Force -AllowClobber }
+#If (-not (Get-Module -Name Az.ResourceGraph)) { Install-Module -Name Az.ResourceGraph -MinimumVersion 0.13.0 -Force -AllowClobber }
 
 #// Search Azure Resource Graph for all subscriptions in a management group
-$subscriptionList = (Search-AzGraph -Query "ResourceContainers | where type =~ 'microsoft.resources/subscriptions'" -ManagementGroup $managementGroupName).id
+#$subscriptionList = (Search-AzGraph -Query "ResourceContainers | where type =~ 'microsoft.resources/subscriptions'" -ManagementGroup $managementGroupName).id
 
 #// Build Prosimo API header using API token
 $headers = @{
