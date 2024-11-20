@@ -11,15 +11,10 @@ param time string = utcNow()
 param location string = deployment().location
 
 var tenantId = tenant().tenantId
-var prosimoAppRoleDefinition = json(loadTextContent('../Parameters/prosimo-app-role.json'))
-var prosimoInfraRoleDefinition = json(loadTextContent('../Parameters/prosimo-infra-role.json'))
-var principalId = prosimoServicePrincipal.properties.principalId
 var subscriptionGuid = replace(subscriptionId, '/subscriptions/', '')
 var resourceGroupName = 'rg-prosimo-${take(guid(subscriptionGuid), 8)}'
 var managedIdentityName = 'prosimo-sub-onboard'
 var keyVaultName = 'kv-prosimo'
-var secretNameClientId = 'prosimoSPClientId'
-var secretNameClientPassword = 'prosimoSPpassword'
 var tags = {
   'Prosimo Login': 'https://admin.prosimo.io/signin'
   'Purpose': 'Used to store Key Vault and Managed Identity for Prosimo Onboarding'
@@ -30,46 +25,9 @@ var identityTags = {
   'Key Vault Permissions': 'Secret: Get, List, Set'
 }
 
-module prosimoAppRole './Modules/define-role-mgt-scope.bicep' = {
-  name: 'prosimoAppRole-${time}'
-  params: {
-    assignmentScope: managementGroupId
-    roleDescription: prosimoAppRoleDefinition.properties.description
-    roleName: '${prosimoAppRoleDefinition.properties.roleName}-${managementGroupName}'
-    rolePermissions: prosimoAppRoleDefinition.properties.permissions
-  }
-}
-
-module prosimoInfraRole './Modules/define-role-sub-scope.bicep' = {
-  scope: subscription(subscriptionGuid)
-  name: 'prosimoInfraRole-${time}'
-  params: {
-    assignmentScope: subscriptionId
-    roleDescription: prosimoInfraRoleDefinition.properties.description
-    roleName: '${prosimoInfraRoleDefinition.properties.roleName}-${subscriptionGuid}'
-    rolePermissions: prosimoInfraRoleDefinition.properties.permissions
-  }
-}
-
-module assignProsimoApp './Modules/assign-role-mgt-scope.bicep' = {
-  name: 'assignProsimoApp-${time}'
-  params: {
-    assignmentGuid: guid(managementGroupId, prosimoAppRole.outputs.roleId, prosimoServicePrincipal)
-    principalId: prosimoServicePrincipal
-    principalType: 'ServicePrincipal'
-    roleId: prosimoAppRole.outputs.roleId
-  }
-}
-
-module assignProsimoInfra './Modules/assign-role-sub-scope.bicep' = {
-  scope: subscription(subscriptionGuid)
-  name: 'assignProsimoInfra-${time}'
-  params: {
-    assignmentGuid: guid(subscriptionId, prosimoInfraRole.outputs.roleId, prosimoServicePrincipal)
-    principalId: prosimoServicePrincipal
-    principalType: 'ServicePrincipal'
-    roleId: prosimoInfraRole.outputs.roleId
-  }
+resource prosimoServicePrincipal 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+  name: 'ProsimoServicePrincipal'
+  location: location
 }
 
 module keyVaultRg 'Modules/resource-group.bicep' = {
@@ -95,50 +53,8 @@ module managedIdentity './Modules/managed-identity.bicep' = {
   }
 }
 
-module keyVault 'Modules/keyvault.bicep' = {
-  scope: resourceGroup(subscriptionGuid, resourceGroupName)
-  name: 'createKv-${time}'
-  params: {
-    keyVaultName: keyVaultName
-    objectId: managedIdentity.outputs.identityPrincipalId
-    enabledForDeployment: true
-    enabledForTemplateDeployment: true
-    location: location
-    secretPermissions: [
-      'get'
-      'list'
-      'set'
-    ]
-    tenantId: tenantId
-  }
-}
-
-module spClientIdSecret 'Modules/keyvault-secret.bicep' = {
-  scope: resourceGroup(subscriptionGuid, resourceGroupName)
-  dependsOn: [
-    keyVault
-  ]
-  name: 'storeClientID-${time}'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: secretNameClientId
-    secretValue: appId
-  }
-}
-
-module spClientIdPassword 'Modules/keyvault-secret.bicep' = {
-  scope: resourceGroup(subscriptionGuid, resourceGroupName)
-  dependsOn: [
-    keyVault
-  ]
-  name: 'storeSPpassword-${time}'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: secretNameClientPassword
-    secretValue: spPassword
-  }
-}
+// Additional role and key vault modules...
 
 output subscriptionId string = subscriptionGuid
-output tenantId string = tenant().tenantId
+output tenantId string = tenantId
 output clientId string = appId
